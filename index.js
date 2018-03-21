@@ -67,20 +67,20 @@ export default class extends React.Component {
     strokeWidthComponent: null,
 
     strokeColors: [
-      { color: '#000000' }, 
-      { color: '#FF0000' }, 
-      { color: '#00FFFF' }, 
-      { color: '#0000FF' }, 
-      { color: '#0000A0' }, 
-      { color: '#ADD8E6' }, 
+      { color: '#000000' },
+      { color: '#FF0000' },
+      { color: '#00FFFF' },
+      { color: '#0000FF' },
+      { color: '#0000A0' },
+      { color: '#ADD8E6' },
       { color: '#800080' },
       { color: '#FFFF00' },
       { color: '#00FF00' },
       { color: '#FF00FF' },
-      { color: '#FFFFFF' }, 
-      { color: '#C0C0C0' }, 
-      { color: '#808080' }, 
-      { color: '#FFA500' }, 
+      { color: '#FFFFFF' },
+      { color: '#C0C0C0' },
+      { color: '#808080' },
+      { color: '#FFA500' },
       { color: '#A52A2A' },
       { color: '#800000' },
       { color: '#008000' },
@@ -136,7 +136,7 @@ export default class extends React.Component {
   }
 
   nextStrokeWidth() {
-    if ((this.state.strokeWidth >= this.props.maxStrokeWidth && this._strokeWidthStep > 0) || 
+    if ((this.state.strokeWidth >= this.props.maxStrokeWidth && this._strokeWidthStep > 0) ||
         (this.state.strokeWidth <= this.props.minStrokeWidth && this._strokeWidthStep < 0))
       this._strokeWidthStep = -this._strokeWidthStep
     this.setState({ strokeWidth: this.state.strokeWidth + this._strokeWidthStep })
@@ -179,16 +179,10 @@ export default class extends React.Component {
                 {this.props.strokeWidthComponent(this.state.strokeWidth)}
               </TouchableOpacity>)
             }
-              
+
             { this.props.undoComponent && (
               <TouchableOpacity onPress={() => {this.props.onUndoPressed(this.undo())}}>
                 { this.props.undoComponent }
-              </TouchableOpacity>)
-            }
-
-            { this.props.clearComponent && (
-              <TouchableOpacity onPress={() => { this.clear(); this.props.onClearPressed() }}>
-                { this.props.clearComponent }
               </TouchableOpacity>)
             }
 
@@ -201,7 +195,7 @@ export default class extends React.Component {
         </View>
         <SketchCanvas
           ref={ref => this._sketchCanvas = ref}
-          style={this.props.canvasStyle} 
+          style={this.props.canvasStyle}
           strokeColor={this.state.color.color}
           onStrokeStart={this.props.onStrokeStart}
           onStrokeChanged={this.props.onStrokeChanged}
@@ -211,7 +205,14 @@ export default class extends React.Component {
           onSketchSaved={success => this.props.onSketchSaved(success)}
           onPathsChange={this.props.onPathsChange}
         />
-        <View style={{ flexDirection: 'row' }}>
+        <View style={this.props.toolsPanel}>
+          <View style={this.props.toolBtn}>
+            { this.props.clearComponent && (
+              <TouchableOpacity onPress={() => { this.clear(); this.props.onClearPressed() }}>
+                { this.props.clearComponent }
+              </TouchableOpacity>)
+            }
+          </View>
           <FlatList
             data={this.props.strokeColors}
             extraData={this.state.color}
