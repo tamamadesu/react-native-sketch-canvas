@@ -144,8 +144,9 @@ export default class extends React.Component {
 
   _renderItem = ({item, index}) => (
     <TouchableOpacity style={{ marginHorizontal: 2.5 }} onPress={() => {
-      this.setState({ color: item })
-      this._colorChanged = true
+      this.setState({ color: item, strokeWidth: this.props.defaultStrokeWidth })
+      this._colorChanged = true;
+      this.props.onColorChanged(item);
     }}>
       { this.state.color.color !== item.color && this.props.strokeComponent && this.props.strokeComponent(item.color) }
       { this.state.color.color === item.color && this.props.strokeSelectedComponent && this.props.strokeSelectedComponent(item.color, index, this._colorChanged) }
@@ -206,21 +207,29 @@ export default class extends React.Component {
           onPathsChange={this.props.onPathsChange}
         />
         <View style={this.props.toolsPanel}>
-          <View style={this.props.toolBtn}>
+          { this.props.colorCurrentComponent }
+          <View style={this.props.toolBtns}>
             { this.props.clearComponent && (
-              <TouchableOpacity onPress={() => { this.clear(); this.props.onClearPressed() }}>
+              <TouchableOpacity onPress={() => { this.clear(); this.props.onClearPressed(); }}>
                 { this.props.clearComponent }
               </TouchableOpacity>)
             }
+            { this.props.eraserComponent && (
+              <TouchableOpacity onPress={() => {this.setState({color: this.props.eraserColor,strokeWidth: this.props.earserStrokeWidth});this.props.onEraserPressed(); }}>
+                { this.props.eraserComponent }
+              </TouchableOpacity>)
+            }
           </View>
-          <FlatList
-            data={this.props.strokeColors}
-            extraData={this.state.color}
-            keyExtractor={() => Math.ceil(Math.random() * 10000000)}
-            renderItem={this._renderItem}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          />
+          <View style={this.props.colorsWrap}>
+            <FlatList
+              data={this.props.strokeColors}
+              extraData={this.state.color}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={this._renderItem}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+            />
+          </View>
         </View>
       </View>
     );
