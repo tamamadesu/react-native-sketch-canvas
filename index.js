@@ -229,6 +229,7 @@ export default class extends React.Component {
               horizontal
               showsHorizontalScrollIndicator={false}
             />
+
           </View>
         </View>
       </View>
