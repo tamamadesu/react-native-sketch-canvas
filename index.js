@@ -205,6 +205,7 @@ export default class extends React.Component {
           strokeWidth={this.state.strokeWidth}
           onSketchSaved={success => this.props.onSketchSaved(success)}
           onPathsChange={this.props.onPathsChange}
+          touchEnabled={this.props.touchEnabled}
         />
         <View style={this.props.toolsPanel}>
           { this.props.colorCurrentComponent }
