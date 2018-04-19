@@ -117,8 +117,8 @@ export default class extends React.Component {
     return this._sketchCanvas.undo()
   }
 
-  addPath(data) {
-    this._sketchCanvas.addPath(data)
+  addPath(data,isEraser) {
+    this._sketchCanvas.addPath(data,isEraser)
   }
 
   deletePath(id) {
@@ -144,7 +144,7 @@ export default class extends React.Component {
 
   _renderItem = ({item, index}) => (
     <TouchableOpacity style={{ marginHorizontal: 2.5 }} onPress={() => {
-      this.setState({ color: item, strokeWidth: this.props.defaultStrokeWidth })
+      this.setState({ color: item })
       this._colorChanged = true;
       this.props.onColorChanged(item);
     }}>
@@ -155,6 +155,10 @@ export default class extends React.Component {
 
   componentDidUpdate() {
     this._colorChanged = false
+  }
+
+  setPathWidth(width){
+    this.setState({strokeWidth: width });
   }
 
   render() {
@@ -197,6 +201,7 @@ export default class extends React.Component {
         <SketchCanvas
           ref={ref => this._sketchCanvas = ref}
           style={this.props.canvasStyle}
+          isEraser={this.props.isEraser}
           strokeColor={this.state.color.color}
           onStrokeStart={this.props.onStrokeStart}
           onStrokeChanged={this.props.onStrokeChanged}
@@ -207,30 +212,31 @@ export default class extends React.Component {
           onPathsChange={this.props.onPathsChange}
           touchEnabled={this.props.touchEnabled}
         />
-        <View style={this.props.toolsPanel}>
-          { this.props.colorCurrentComponent }
-          <View style={this.props.toolBtns}>
-            { this.props.clearComponent && (
-              <TouchableOpacity onPress={() => { this.clear(); this.props.onClearPressed(); }}>
-                { this.props.clearComponent }
-              </TouchableOpacity>)
-            }
-            { this.props.eraserComponent && (
+        <View style={this.props.toolsPanelWrap}>
+
+            { this.props.colorCurrentComponent }
+          <View style={this.props.toolsPanel}>
+
+            <View style={this.props.toolBtns}>
+              { this.props.clearComponent && (
+                <TouchableOpacity onPress={() => { this.clear(); this.props.onClearPressed() }}>
+                  { this.props.clearComponent }
+                </TouchableOpacity>)
+              }
+              { this.props.eraserComponent && (
               <TouchableOpacity onPress={() => {this.setState({color: this.props.eraserColor,strokeWidth: this.props.earserStrokeWidth});this.props.onEraserPressed(); }}>
                 { this.props.eraserComponent }
               </TouchableOpacity>)
             }
-          </View>
-          <View style={this.props.colorsWrap}>
+            </View>
             <FlatList
               data={this.props.strokeColors}
               extraData={this.state.color}
-              keyExtractor={(item, index) => index.toString()}
+              keyExtractor={() => Math.ceil(Math.random() * 10000000)}
               renderItem={this._renderItem}
               horizontal
               showsHorizontalScrollIndicator={false}
             />
-
           </View>
         </View>
       </View>

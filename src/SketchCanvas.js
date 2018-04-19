@@ -83,7 +83,8 @@ class SketchCanvas extends React.Component {
     return lastId
   }
 
-  addPath(data) {
+  addPath(data,isEraser) {
+    console.log('addPath3',isEraser)
     if (this._initialized) {
       if (this._paths.filter(p => p.path.id === data.path.id).length === 0) this._paths.push(data)
       const pathData = data.path.data.map(p => {
@@ -91,7 +92,8 @@ class SketchCanvas extends React.Component {
         return `${coor[0] * this._screenScale * this._size.width / data.size.width },${coor[1] * this._screenScale * this._size.height / data.size.height }`;
       })
       if (Platform.OS === 'ios') {
-        SketchCanvasManager.addPath(data.path.id, processColor(data.path.color), data.path.width, pathData)
+          console.log('addPath',isEraser)
+          SketchCanvasManager.addPath(data.path.id, processColor(data.path.color), data.path.width, pathData,isEraser || false)
       } else {
         UIManager.dispatchViewManagerCommand(this._handle, UIManager.RNSketchCanvas.Commands.addPath, [
           data.path.id, processColor(data.path.color), data.path.width, pathData
@@ -144,12 +146,17 @@ class SketchCanvas extends React.Component {
         const e = evt.nativeEvent
         this._offset = { x: e.pageX - e.locationX, y: e.pageY - e.locationY }
         this._path = {
-          id: parseInt(Math.random() * 100000000), color: this.props.strokeColor, 
+          id: parseInt(Math.random() * 100000000), color: this.props.strokeColor,
           width: this.props.strokeWidth, data: []
         }
-        
+
         if (Platform.OS === 'ios') {
-          SketchCanvasManager.newPath(this._path.id, processColor(this._path.color), this._path.width)
+          console.log('drawing',this.props.isEraser)
+          if(this.props.isEraser){
+            SketchCanvasManager.newPath(this._path.id, processColor(this._path.color), this._path.width, true)
+          }else{
+            SketchCanvasManager.newPath(this._path.id, processColor(this._path.color), this._path.width, false)
+          }
           SketchCanvasManager.addPoint(
             parseFloat((gestureState.x0 - this._offset.x).toFixed(2) * this._screenScale),
             parseFloat((gestureState.y0 - this._offset.y).toFixed(2) * this._screenScale)
@@ -171,12 +178,12 @@ class SketchCanvas extends React.Component {
         if (this._path) {
           if (Platform.OS === 'ios') {
             SketchCanvasManager.addPoint(
-              parseFloat((gestureState.moveX - this._offset.x).toFixed(2) * this._screenScale), 
+              parseFloat((gestureState.moveX - this._offset.x).toFixed(2) * this._screenScale),
               parseFloat((gestureState.moveY - this._offset.y).toFixed(2) * this._screenScale)
             )
           } else {
             UIManager.dispatchViewManagerCommand(this._handle, UIManager.RNSketchCanvas.Commands.addPoint, [
-              parseFloat((gestureState.moveX - this._offset.x).toFixed(2) * this._screenScale), 
+              parseFloat((gestureState.moveX - this._offset.x).toFixed(2) * this._screenScale),
               parseFloat((gestureState.moveY - this._offset.y).toFixed(2) * this._screenScale)
             ])
           }
@@ -205,7 +212,7 @@ class SketchCanvas extends React.Component {
 
   render() {
     return (
-      <RNSketchCanvas 
+      <RNSketchCanvas
         ref={ref => {
           this._handle = ReactNative.findNodeHandle(ref)
         }}
@@ -213,9 +220,11 @@ class SketchCanvas extends React.Component {
         onLayout={e => {
           this._size={ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height }
           this._initialized = true
-          this._pathsToProcess.length > 0 && this._pathsToProcess.forEach(p => this.addPath(p))
+          this._pathsToProcess.length > 0 && this._pathsToProcess.forEach(p => {
+            this.addPath(p,p.action == 2 ? true : false);
+          })
         }}
-        {...this.panResponder.panHandlers} 
+        {...this.panResponder.panHandlers}
         onChange={(e) => {
           if (e.nativeEvent.hasOwnProperty('pathsUpdate')) {
             this.props.onPathsChange(e.nativeEvent.pathsUpdate)
