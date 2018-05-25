@@ -157,6 +157,9 @@ export default class extends React.Component {
     this._colorChanged = false
   }
 
+  setColor(color){
+    this.setState({color});
+  }
   setPathWidth(width){
     this.setState({strokeWidth: width });
   }
@@ -232,7 +235,7 @@ export default class extends React.Component {
             <FlatList
               data={this.props.strokeColors}
               extraData={this.state.color}
-              keyExtractor={(item, index) => index + ' '}
+              keyExtractor={() => Math.ceil(Math.random() * 10000000).toString()}
               renderItem={this._renderItem}
               horizontal
               showsHorizontalScrollIndicator={false}

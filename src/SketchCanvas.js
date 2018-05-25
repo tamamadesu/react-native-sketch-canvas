@@ -68,6 +68,7 @@ class SketchCanvas extends React.Component {
 
   clear() {
     this._paths = []
+    this._pathsToProcess = []
     this._path = null
     if (Platform.OS === 'ios') {
       SketchCanvasManager.clear()
@@ -96,7 +97,7 @@ class SketchCanvas extends React.Component {
           SketchCanvasManager.addPath(data.path.id, processColor(data.path.color), data.path.width, pathData,isEraser || false)
       } else {
         UIManager.dispatchViewManagerCommand(this._handle, UIManager.RNSketchCanvas.Commands.addPath, [
-          data.path.id, processColor(data.path.color), data.path.width, pathData
+          data.path.id, processColor(data.path.color), data.path.width, pathData, isEraser || false
         ])
       }
     } else {
@@ -152,18 +153,14 @@ class SketchCanvas extends React.Component {
 
         if (Platform.OS === 'ios') {
           console.log('drawing',this.props.isEraser)
-          if(this.props.isEraser){
-            SketchCanvasManager.newPath(this._path.id, processColor(this._path.color), this._path.width, true)
-          }else{
-            SketchCanvasManager.newPath(this._path.id, processColor(this._path.color), this._path.width, false)
-          }
+          SketchCanvasManager.newPath(this._path.id, processColor(this._path.color), this._path.width, this.props.isEraser)
           SketchCanvasManager.addPoint(
             parseFloat((gestureState.x0 - this._offset.x).toFixed(2) * this._screenScale),
             parseFloat((gestureState.y0 - this._offset.y).toFixed(2) * this._screenScale)
           )
         } else {
           UIManager.dispatchViewManagerCommand(this._handle, UIManager.RNSketchCanvas.Commands.newPath, [
-            this._path.id, processColor(this._path.color), this._path.width,
+            this._path.id, processColor(this._path.color), this._path.width,this.props.isEraser
           ])
           UIManager.dispatchViewManagerCommand(this._handle, UIManager.RNSketchCanvas.Commands.addPoint, [
             parseFloat((gestureState.x0 - this._offset.x).toFixed(2) * this._screenScale),
