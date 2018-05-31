@@ -69,6 +69,7 @@ class SketchCanvas extends React.Component {
   clear() {
     this._paths = []
     this._pathsToProcess = []
+    this._restoreMode = false
     this._path = null
     if (Platform.OS === 'ios') {
       SketchCanvasManager.clear()
@@ -84,8 +85,7 @@ class SketchCanvas extends React.Component {
     return lastId
   }
 
-  addPath(data,isEraser) {
-    console.log('addPath3',isEraser)
+  restorePath(data,isEraser){
     if (this._initialized) {
       if (this._paths.filter(p => p.path.id === data.path.id).length === 0) this._paths.push(data)
       const pathData = data.path.data.map(p => {
@@ -93,7 +93,25 @@ class SketchCanvas extends React.Component {
         return `${coor[0] * this._screenScale * this._size.width / data.size.width },${coor[1] * this._screenScale * this._size.height / data.size.height }`;
       })
       if (Platform.OS === 'ios') {
-          console.log('addPath',isEraser)
+          SketchCanvasManager.restorePath(data.path.id, processColor(data.path.color), data.path.width, pathData,isEraser || false)
+      } else {
+        UIManager.dispatchViewManagerCommand(this._handle, UIManager.RNSketchCanvas.Commands.restorePath, [
+          data.path.id, processColor(data.path.color), data.path.width, pathData, isEraser || false
+        ])
+      }
+    } else {
+      this._pathsToProcess.filter(p => p.path.id === data.path.id).length === 0 && this._pathsToProcess.push(data)
+    }
+  }
+
+  addPath(data,isEraser) {
+    if (this._initialized) {
+      if (this._paths.filter(p => p.path.id === data.path.id).length === 0) this._paths.push(data)
+      const pathData = data.path.data.map(p => {
+        const coor = p.split(',').map(pp => parseFloat(pp).toFixed(2))
+        return `${coor[0] * this._screenScale * this._size.width / data.size.width },${coor[1] * this._screenScale * this._size.height / data.size.height }`;
+      })
+      if (Platform.OS === 'ios') {
           SketchCanvasManager.addPath(data.path.id, processColor(data.path.color), data.path.width, pathData,isEraser || false)
       } else {
         UIManager.dispatchViewManagerCommand(this._handle, UIManager.RNSketchCanvas.Commands.addPath, [
@@ -150,9 +168,9 @@ class SketchCanvas extends React.Component {
           id: parseInt(Math.random() * 100000000), color: this.props.strokeColor,
           width: this.props.strokeWidth, data: []
         }
+        console.log('this.props.strokeColor', this.props.strokeColor);
 
         if (Platform.OS === 'ios') {
-          console.log('drawing',this.props.isEraser)
           SketchCanvasManager.newPath(this._path.id, processColor(this._path.color), this._path.width, this.props.isEraser)
           SketchCanvasManager.addPoint(
             parseFloat((gestureState.x0 - this._offset.x).toFixed(2) * this._screenScale),
@@ -215,10 +233,15 @@ class SketchCanvas extends React.Component {
         }}
         style={this.props.style}
         onLayout={e => {
+          console.log('onLayout');
           this._size={ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height }
           this._initialized = true
           this._pathsToProcess.length > 0 && this._pathsToProcess.forEach(p => {
-            this.addPath(p,p.action == 2 ? true : false);
+            if(this.props.restoreMode){
+              this.restorePath(p,p.action == 2 ? true : false);
+            }else{
+              this.addPath(p,p.action == 2 ? true : false);
+            }
           })
         }}
         {...this.panResponder.panHandlers}

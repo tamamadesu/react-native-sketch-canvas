@@ -103,6 +103,7 @@ export default class extends React.Component {
     this.state = {
       color: props.strokeColors[props.defaultStrokeIndex],
       strokeWidth: props.defaultStrokeWidth,
+      restoreMode: false
     }
 
     this._colorChanged = false
@@ -118,7 +119,19 @@ export default class extends React.Component {
   }
 
   addPath(data,isEraser) {
+    if(this.state.restoreMode){
+      this.setState({
+        restoroMode: false
+      });
+    }
     this._sketchCanvas.addPath(data,isEraser)
+  }
+
+  restorePath(data,isEraser){
+    this.setState({
+      restoreMode: true
+    });
+    this._sketchCanvas.restorePath(data,isEraser)
   }
 
   deletePath(id) {
@@ -210,6 +223,7 @@ export default class extends React.Component {
           onStrokeChanged={this.props.onStrokeChanged}
           onStrokeEnd={this.props.onStrokeEnd}
           user={this.props.user}
+          restoreMode={this.state.restoreMode}
           strokeWidth={this.state.strokeWidth}
           onSketchSaved={success => this.props.onSketchSaved(success)}
           onPathsChange={this.props.onPathsChange}
@@ -227,7 +241,7 @@ export default class extends React.Component {
                 </TouchableOpacity>)
               }
               { this.props.eraserComponent && (
-              <TouchableOpacity onPress={() => {this.setState({color: this.props.eraserColor,strokeWidth: this.props.earserStrokeWidth});this.props.onEraserPressed(); }}>
+              <TouchableOpacity onPress={() => { this.props.onEraserPressed(); }}>
                 { this.props.eraserComponent }
               </TouchableOpacity>)
             }
