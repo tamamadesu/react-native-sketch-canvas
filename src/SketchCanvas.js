@@ -162,6 +162,8 @@ class SketchCanvas extends React.Component {
 
       onPanResponderGrant: (evt, gestureState) => {
         if (!this.props.touchEnabled) return
+        if(gestureState.numberActiveTouches > 1) return;
+        console.log('touch','start' + gestureState.numberActiveTouches)
         const e = evt.nativeEvent
         this._offset = { x: e.pageX - e.locationX, y: e.pageY - e.locationY }
         this._path = {
@@ -190,6 +192,8 @@ class SketchCanvas extends React.Component {
       },
       onPanResponderMove: (evt, gestureState) => {
         if (!this.props.touchEnabled) return
+        if(gestureState.numberActiveTouches > 1) return;
+        console.log('touch','move'+ gestureState.numberActiveTouches)
         if (this._path) {
           if (Platform.OS === 'ios') {
             SketchCanvasManager.addPoint(
@@ -208,6 +212,8 @@ class SketchCanvas extends React.Component {
       },
       onPanResponderRelease: (evt, gestureState) => {
         if (!this.props.touchEnabled) return
+        if(gestureState.numberActiveTouches > 1) return;
+        console.log('touch','release'+ gestureState.numberActiveTouches)
         if (this._path) {
           this.props.onStrokeEnd({ path: this._path, size: this._size, drawer: this.props.user })
           this._paths.push({ path: this._path, size: this._size, drawer: this.props.user })
